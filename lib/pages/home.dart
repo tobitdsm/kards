@@ -122,7 +122,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       subtitle: Text(
-                        '${card.cardType} Code',
+                        card.cardType,
                         style: TextStyle(color: colorScheme.onSurfaceVariant),
                       ),
                       trailing: PopupMenuButton(
