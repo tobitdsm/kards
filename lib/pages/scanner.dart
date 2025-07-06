@@ -21,45 +21,8 @@ class _ScannerPageState extends State<ScannerPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Scan Loyalty Card'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
-        actions: [
-          IconButton(
-            color: colorScheme.onPrimary,
-            icon: ValueListenableBuilder(
-              valueListenable: cameraController.torchState,
-              builder: (context, state, child) {
-                switch (state) {
-                  case TorchState.off:
-                    return Icon(
-                      Icons.flash_off,
-                      color: colorScheme.onPrimary.withValues(alpha: 0.6),
-                    );
-                  case TorchState.on:
-                    return Icon(Icons.flash_on, color: Colors.yellow);
-                }
-              },
-            ),
-            iconSize: 32.0,
-            onPressed: () => cameraController.toggleTorch(),
-          ),
-          IconButton(
-            color: colorScheme.onPrimary,
-            icon: ValueListenableBuilder(
-              valueListenable: cameraController.cameraFacingState,
-              builder: (context, state, child) {
-                switch (state) {
-                  case CameraFacing.front:
-                    return const Icon(Icons.camera_front);
-                  case CameraFacing.back:
-                    return const Icon(Icons.camera_rear);
-                }
-              },
-            ),
-            iconSize: 32.0,
-            onPressed: () => cameraController.switchCamera(),
-          ),
-        ],
+        backgroundColor: colorScheme.inversePrimary,
+        foregroundColor: colorScheme.inverseSurface,
       ),
       body: Column(
         children: [
@@ -77,7 +40,7 @@ class _ScannerPageState extends State<ScannerPage> {
                     _showCardDetailsDialog(
                       barcode.rawValue!,
                       barcode
-                          .format, // Use barcode.format instead of barcode.type
+                          .format,
                     );
                   }
                 }
@@ -87,27 +50,44 @@ class _ScannerPageState extends State<ScannerPage> {
           Expanded(
             flex: 1,
             child: Container(
-              padding: EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  Text(
-                    'Position the QR code or barcode within the frame',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: colorScheme.onSurface,
-                    ),
-                    textAlign: TextAlign.center,
+              color: Theme.of(context).colorScheme.inversePrimary,
+              padding: EdgeInsets.all(50),
+              child: ListTile(
+                leading: IconButton(
+                  color: colorScheme.onSurface,
+                  icon: ValueListenableBuilder(
+                    valueListenable: cameraController.torchState,
+                    builder: (context, state, child) {
+                      switch (state) {
+                        case TorchState.off:
+                          return Icon(
+                            Icons.flash_off,
+                            color: colorScheme.onSurface.withValues(alpha: 0.6),
+                          );
+                        case TorchState.on:
+                          return Icon(Icons.flash_on, color: Colors.yellow);
+                      }
+                    },
                   ),
-                  SizedBox(height: 20),
-                  Text(
-                    'Flash and camera controls are in the top bar',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
+                  iconSize: 32.0,
+                  onPressed: () => cameraController.toggleTorch(),
+                ),
+                trailing: IconButton(
+                  color: colorScheme.onSurface.withValues(alpha: 0.6),
+                  icon: ValueListenableBuilder(
+                    valueListenable: cameraController.cameraFacingState,
+                    builder: (context, state, child) {
+                      switch (state) {
+                        case CameraFacing.front:
+                          return const Icon(Icons.camera_front);
+                        case CameraFacing.back:
+                          return const Icon(Icons.camera_rear);
+                      }
+                    },
                   ),
-                ],
+                  iconSize: 32.0,
+                  onPressed: () => cameraController.switchCamera(),
+                ),
               ),
             ),
           ),
@@ -177,7 +157,6 @@ class _ScannerPageState extends State<ScannerPage> {
   }
 
   String _getCardType(BarcodeFormat format) {
-    // Check for QR code format
     switch (format) {
       case BarcodeFormat.qrCode:
         return 'QR';

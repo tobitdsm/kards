@@ -15,8 +15,8 @@ class CardDisplayPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(card.storeName),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+        backgroundColor: colorScheme.inversePrimary,
+        foregroundColor: colorScheme.inverseSurface,
       ),
       body: Center(
         child: Container(
@@ -45,7 +45,7 @@ class CardDisplayPage extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: colorScheme.primary,
+                        color: colorScheme.inversePrimary,
                       ),
                     ),
                     SizedBox(height: 20),

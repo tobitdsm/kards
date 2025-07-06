@@ -2,7 +2,7 @@ class LoyaltyCard {
   final String id;
   final String storeName;
   final String cardData;
-  final String cardType; // 'QR' or 'BARCODE'
+  final String cardType;
   final DateTime dateAdded;
 
   LoyaltyCard({
