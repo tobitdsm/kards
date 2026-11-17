@@ -1,0 +1,55 @@
+{
+  "@@locale": "en",
+  "appTitle": "Kards",
+  "sortCards": "Sort Cards",
+  "storeName": "Store Name",
+  "dateAdded": "Date Added",
+  "cardType": "Card Type",
+  "ascendingOrder": "Ascending Order",
+  "done": "Done",
+  "searchCards": "Search cards...",
+  "sortCardsTooltip": "Sort cards",
+  "clearSearch": "Clear search",
+  "noLoyaltyCards": "No loyalty cards yet",
+  "scanFirstCard": "Tap the + button to scan your first card",
+  "noCardsFound": "No cards found",
+  "adjustSearch": "Try adjusting your search",
+  "addedDate": "Added: {date}",
+  "@addedDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "delete": "Delete",
+  "deleteCard": "Delete Card",
+  "confirmDeleteCard": "Are you sure you want to delete the {storeName} loyalty card?",
+  "@confirmDeleteCard": {
+    "placeholders": {
+      "storeName": {
+        "type": "String"
+      }
+    }
+  },
+  "cancel": "Cancel",
+  "scanLoyaltyCard": "Scan Loyalty Card",
+  "addLoyaltyCard": "Add Loyalty Card",
+  "storeNameHint": "e.g., Starbucks, Target, etc.",
+  "scannedFormat": "Scanned: {format}",
+  "@scannedFormat": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "saveCard": "Save Card",
+  "qrCode": "QR Code",
+  "barcode": "Barcode",
+  "showCodeAtCheckout": "Show this code at checkout",
+  "invalidBarcodeData": "Invalid barcode data",
+  "toggleFlash": "Toggle flashlight",
+  "switchCamera": "Switch camera",
+  "switchLanguage": "Switch language"
+}

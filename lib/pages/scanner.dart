@@ -1,7 +1,11 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../loyalty_card.dart';
+import '../l10n/generated/app_localizations.dart';
 
 class ScannerPage extends StatefulWidget {
   const ScannerPage({super.key});
@@ -17,10 +21,11 @@ class _ScannerPageState extends State<ScannerPage> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Scan Loyalty Card'),
+        title: Text(l10n.scanLoyaltyCard),
         backgroundColor: colorScheme.inversePrimary,
         foregroundColor: colorScheme.inverseSurface,
       ),
@@ -33,14 +38,17 @@ class _ScannerPageState extends State<ScannerPage> {
               onDetect: (capture) {
                 if (isScanning && capture.barcodes.isNotEmpty) {
                   final barcode = capture.barcodes.first;
-                  if (barcode.rawValue != null) {
+                  if (barcode.rawValue != null || barcode.rawBytes != null) {
+                    final cardDataBytes =
+                        barcode.rawBytes ??
+                        Uint8List.fromList(utf8.encode(barcode.rawValue!));
                     setState(() {
                       isScanning = false;
                     });
                     _showCardDetailsDialog(
-                      barcode.rawValue!,
-                      barcode
-                          .format,
+                      barcode.rawValue ?? base64Encode(cardDataBytes),
+                      barcode.format,
+                      cardDataBytes,
                     );
                   }
                 }
@@ -56,9 +64,9 @@ class _ScannerPageState extends State<ScannerPage> {
                 leading: IconButton(
                   color: colorScheme.onSurface,
                   icon: ValueListenableBuilder(
-                    valueListenable: cameraController.torchState,
+                    valueListenable: cameraController,
                     builder: (context, state, child) {
-                      switch (state) {
+                      switch (state.torchState) {
                         case TorchState.off:
                           return Icon(
                             Icons.flash_off,
@@ -66,18 +74,29 @@ class _ScannerPageState extends State<ScannerPage> {
                           );
                         case TorchState.on:
                           return Icon(Icons.flash_on, color: Colors.yellow);
+                        case TorchState.unavailable:
+                          return Icon(
+                            Icons.flash_off,
+                            color: colorScheme.onSurface,
+                          );
+                        case TorchState.auto:
+                          return Icon(
+                            Icons.flash_auto,
+                            color: colorScheme.onSurface,
+                          );
                       }
                     },
                   ),
                   iconSize: 32.0,
+                  tooltip: l10n.toggleFlash,
                   onPressed: () => cameraController.toggleTorch(),
                 ),
                 trailing: IconButton(
                   color: colorScheme.onSurface.withValues(alpha: 0.6),
                   icon: ValueListenableBuilder(
-                    valueListenable: cameraController.cameraFacingState,
+                    valueListenable: cameraController,
                     builder: (context, state, child) {
-                      switch (state) {
+                      switch (state.cameraDirection) {
                         case CameraFacing.front:
                           return const Icon(Icons.camera_front);
                         case CameraFacing.back:
@@ -86,6 +105,7 @@ class _ScannerPageState extends State<ScannerPage> {
                     },
                   ),
                   iconSize: 32.0,
+                  tooltip: l10n.switchCamera,
                   onPressed: () => cameraController.switchCamera(),
                 ),
               ),
@@ -96,31 +116,38 @@ class _ScannerPageState extends State<ScannerPage> {
     );
   }
 
-  void _showCardDetailsDialog(String cardData, BarcodeFormat format) {
+  void _showCardDetailsDialog(
+    String cardData,
+    BarcodeFormat format,
+    List<int> cardDataBytes,
+  ) {
     final TextEditingController storeNameController = TextEditingController();
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     showDialog(
       context: context,
       barrierDismissible: false,
       builder:
           (context) => AlertDialog(
-            title: Text('Add Loyalty Card'),
+            title: Text(l10n.addLoyaltyCard),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: storeNameController,
                   decoration: InputDecoration(
-                    labelText: 'Store Name',
-                    hintText: 'e.g., Starbucks, Target, etc.',
+                    labelText: l10n.storeName,
+                    hintText: l10n.storeNameHint,
                     border: OutlineInputBorder(),
                   ),
                   autofocus: true,
                 ),
                 SizedBox(height: 16),
                 Text(
-                  'Scanned: ${format.name.toUpperCase()}',
+                  l10n.scannedFormat(
+                    _getCardType(format) == 'QR' ? l10n.qrCode : l10n.barcode,
+                  ),
                   style: TextStyle(color: colorScheme.onSurfaceVariant),
                 ),
               ],
@@ -133,7 +160,7 @@ class _ScannerPageState extends State<ScannerPage> {
                     isScanning = true;
                   });
                 },
-                child: Text('Cancel'),
+                child: Text(l10n.cancel),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -142,6 +169,7 @@ class _ScannerPageState extends State<ScannerPage> {
                       id: DateTime.now().millisecondsSinceEpoch.toString(),
                       storeName: storeNameController.text,
                       cardData: cardData,
+                      cardDataBytes: Uint8List.fromList(cardDataBytes),
                       cardType: _getCardType(format),
                       dateAdded: DateTime.now(),
                     );
@@ -149,7 +177,7 @@ class _ScannerPageState extends State<ScannerPage> {
                     Navigator.pop(context, card);
                   }
                 },
-                child: Text('Save Card'),
+                child: Text(l10n.saveCard),
               ),
             ],
           ),

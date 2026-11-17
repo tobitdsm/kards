@@ -2,16 +2,20 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:kards/pages/scanner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../loyalty_card.dart';
+import '../l10n/generated/app_localizations.dart';
 import 'card_display.dart';
 
 enum SortOption { name, dateAdded, cardType }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({super.key, required this.onLocaleChanged});
+
+  final ValueChanged<Locale> onLocaleChanged;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -104,16 +108,17 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _showSortDialog() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text('Sort Cards'),
+            title: Text(l10n.sortCards),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 RadioListTile<SortOption>(
-                  title: Text('Store Name'),
+                  title: Text(l10n.storeName),
                   value: SortOption.name,
                   groupValue: currentSortOption,
                   onChanged: (value) {
@@ -125,7 +130,7 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
                 RadioListTile<SortOption>(
-                  title: Text('Date Added'),
+                  title: Text(l10n.dateAdded),
                   value: SortOption.dateAdded,
                   groupValue: currentSortOption,
                   onChanged: (value) {
@@ -137,7 +142,7 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
                 RadioListTile<SortOption>(
-                  title: Text('Card Type'),
+                  title: Text(l10n.cardType),
                   value: SortOption.cardType,
                   groupValue: currentSortOption,
                   onChanged: (value) {
@@ -150,7 +155,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 Divider(),
                 SwitchListTile(
-                  title: Text('Ascending Order'),
+                  title: Text(l10n.ascendingOrder),
                   value: sortAscending,
                   onChanged: (value) {
                     setState(() {
@@ -165,7 +170,7 @@ class _HomePageState extends State<HomePage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('Done'),
+                child: Text(l10n.done),
               ),
             ],
           ),
@@ -176,15 +181,29 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return GestureDetector(
       // Add GestureDetector to dismiss keyboard when tapping outside
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Kards'),
+          title: Text(l10n.appTitle),
           backgroundColor: colorScheme.inversePrimary,
           foregroundColor: colorScheme.inverseSurface,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.language),
+              tooltip: l10n.switchLanguage,
+              onPressed: () {
+                final nextLocale =
+                    l10n.localeName.startsWith('nl')
+                        ? const Locale('en')
+                        : const Locale('nl');
+                widget.onLocaleChanged(nextLocale);
+              },
+            ),
+          ],
         ),
         body: Column(
           children: [
@@ -194,12 +213,13 @@ class _HomePageState extends State<HomePage> {
                   controller: _searchController,
                   focusNode: _searchFocusNode, // Add FocusNode
                   decoration: InputDecoration(
-                    hintText: 'Search cards...',
+                    hintText: l10n.searchCards,
                     prefixIcon: Icon(Icons.search),
                     suffixIcon:
                         _searchController.text.isNotEmpty
                             ? IconButton(
                               icon: Icon(Icons.clear),
+                              tooltip: l10n.clearSearch,
                               onPressed: () {
                                 _searchController.clear();
                                 _searchFocusNode
@@ -217,7 +237,7 @@ class _HomePageState extends State<HomePage> {
                 trailing: IconButton(
                   icon: Icon(Icons.sort),
                   onPressed: _showSortDialog,
-                  tooltip: 'Sort cards',
+                  tooltip: l10n.sortCardsTooltip,
                 ),
               ),
             Expanded(
@@ -234,7 +254,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                             SizedBox(height: 16),
                             Text(
-                              'No loyalty cards yet',
+                              l10n.noLoyaltyCards,
                               style: TextStyle(
                                 fontSize: 18,
                                 color: colorScheme.onSurfaceVariant,
@@ -242,7 +262,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                             SizedBox(height: 8),
                             Text(
-                              'Tap the + button to scan your first card',
+                              l10n.scanFirstCard,
                               style: TextStyle(
                                 fontSize: 14,
                                 color: colorScheme.onSurfaceVariant,
@@ -263,7 +283,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                             SizedBox(height: 16),
                             Text(
-                              'No cards found',
+                              l10n.noCardsFound,
                               style: TextStyle(
                                 fontSize: 18,
                                 color: colorScheme.onSurfaceVariant,
@@ -271,7 +291,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                             SizedBox(height: 8),
                             Text(
-                              'Try adjusting your search',
+                              l10n.adjustSearch,
                               style: TextStyle(
                                 fontSize: 14,
                                 color: colorScheme.onSurfaceVariant,
@@ -316,13 +336,19 @@ class _HomePageState extends State<HomePage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    card.cardType,
+                                    card.cardType == 'QR'
+                                        ? l10n.qrCode
+                                        : l10n.barcode,
                                     style: TextStyle(
                                       color: colorScheme.onSurfaceVariant,
                                     ),
                                   ),
                                   Text(
-                                    'Added: ${card.dateAdded.day}/${card.dateAdded.month}/${card.dateAdded.year}',
+                                    l10n.addedDate(
+                                      DateFormat.yMd(
+                                        l10n.localeName,
+                                      ).format(card.dateAdded),
+                                    ),
                                     style: TextStyle(
                                       color: colorScheme.onSurfaceVariant,
                                       fontSize: 12,
@@ -347,7 +373,7 @@ class _HomePageState extends State<HomePage> {
                                               color: colorScheme.error,
                                             ),
                                             SizedBox(width: 8),
-                                            Text('Delete'),
+                                            Text(l10n.delete),
                                           ],
                                         ),
                                       ),
@@ -398,19 +424,18 @@ class _HomePageState extends State<HomePage> {
 
   void _showDeleteDialog(LoyaltyCard card) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     showDialog(
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text('Delete Card'),
-            content: Text(
-              'Are you sure you want to delete the ${card.storeName} loyalty card?',
-            ),
+            title: Text(l10n.deleteCard),
+            content: Text(l10n.confirmDeleteCard(card.storeName)),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('Cancel'),
+                child: Text(l10n.cancel),
               ),
               TextButton(
                 onPressed: () {
@@ -418,7 +443,7 @@ class _HomePageState extends State<HomePage> {
                   _deleteCard(card.id);
                 },
                 child: Text(
-                  'Delete',
+                  l10n.delete,
                   style: TextStyle(color: colorScheme.error),
                 ),
               ),

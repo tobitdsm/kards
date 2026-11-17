@@ -2,6 +2,7 @@ import 'package:barcode_widget/barcode_widget.dart' as bw;
 import 'package:flutter/material.dart';
 
 import '../loyalty_card.dart';
+import '../l10n/generated/app_localizations.dart';
 
 class CardDisplayPage extends StatelessWidget {
   final LoyaltyCard card;
@@ -11,6 +12,7 @@ class CardDisplayPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
@@ -56,7 +58,7 @@ class CardDisplayPage extends StatelessWidget {
                     ),
                     SizedBox(height: 20),
                     Text(
-                      card.cardType == 'QR' ? 'QR Code' : 'Barcode',
+                      card.cardType == 'QR' ? l10n.qrCode : l10n.barcode,
                       style: TextStyle(
                         fontSize: 16,
                         color: colorScheme.onSurfaceVariant,
@@ -81,7 +83,7 @@ class CardDisplayPage extends StatelessWidget {
                     SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Show this code at checkout',
+                        l10n.showCodeAtCheckout,
                         style: TextStyle(
                           color: colorScheme.onPrimaryContainer,
                           fontSize: 14,
@@ -100,22 +102,37 @@ class CardDisplayPage extends StatelessWidget {
 
   Widget _buildBarcode(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     try {
       if (card.cardType == 'QR') {
-        return bw.BarcodeWidget(
-          barcode: bw.Barcode.qrCode(),
-          data: card.cardData,
-          width: 250,
-          height: 250,
-        );
+        return card.cardDataBytes == null
+            ? bw.BarcodeWidget(
+              barcode: bw.Barcode.qrCode(),
+              data: card.cardData,
+              width: 250,
+              height: 250,
+            )
+            : bw.BarcodeWidget.fromBytes(
+              barcode: bw.Barcode.qrCode(),
+              data: card.cardDataBytes!,
+              width: 250,
+              height: 250,
+            );
       } else {
-        return bw.BarcodeWidget(
-          barcode: bw.Barcode.code128(),
-          data: card.cardData,
-          width: 250,
-          height: 100,
-        );
+        return card.cardDataBytes == null
+            ? bw.BarcodeWidget(
+              barcode: bw.Barcode.code128(),
+              data: card.cardData,
+              width: 250,
+              height: 100,
+            )
+            : bw.BarcodeWidget.fromBytes(
+              barcode: bw.Barcode.code128(),
+              data: card.cardDataBytes!,
+              width: 250,
+              height: 100,
+            );
       }
     } catch (e) {
       return Container(
@@ -132,7 +149,7 @@ class CardDisplayPage extends StatelessWidget {
               Icon(Icons.error, color: colorScheme.error, size: 32),
               SizedBox(height: 8),
               Text(
-                'Invalid barcode data',
+                l10n.invalidBarcodeData,
                 style: TextStyle(color: colorScheme.error),
               ),
               SizedBox(height: 8),
